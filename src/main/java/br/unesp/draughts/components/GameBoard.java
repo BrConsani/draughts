@@ -111,6 +111,10 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
         return new Point(0, 0);
     }
 
+    private boolean hasPieceInPosition(Point point) {
+        return pieces[point.x][point.y] instanceof Piece;
+    }
+
     private List<Point> getAllowedPositions(final Piece piece) {
         final Point piecePosition = getComponentPosition(piece);
 
@@ -118,21 +122,33 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
 
         if (piece.isWhite) {
             if (piecePosition.y > 0) {
-                allowedPoints.add(new Point(piecePosition.x - 1, piecePosition.y - 1));
+                Point positionToGo = new Point(piecePosition.x - 1, piecePosition.y - 1);
+                if (!hasPieceInPosition(positionToGo)) {
+                    allowedPoints.add(positionToGo);
+                }
             }
 
             if (piecePosition.y != (BOARD_SIZE - 1)) {
-                allowedPoints.add(new Point(piecePosition.x - 1, piecePosition.y + 1));
+                Point positionToGo = new Point(piecePosition.x - 1, piecePosition.y + 1);
+                if (!hasPieceInPosition(positionToGo)) {
+                    allowedPoints.add(positionToGo);
+                }
             }
 
             return allowedPoints;
         } else {
             if (piecePosition.y > 0) {
-                allowedPoints.add(new Point(piecePosition.x + 1, piecePosition.y - 1));
+                Point positionToGo = new Point(piecePosition.x + 1, piecePosition.y - 1);
+                if (!hasPieceInPosition(positionToGo)) {
+                    allowedPoints.add(positionToGo);
+                }
             }
 
             if (piecePosition.y != (BOARD_SIZE - 1)) {
-                allowedPoints.add(new Point(piecePosition.x + 1, piecePosition.y + 1));
+                Point positionToGo = new Point(piecePosition.x + 1, piecePosition.y + 1);
+                if (!hasPieceInPosition(positionToGo)) {
+                    allowedPoints.add(positionToGo);
+                }
             }
 
             return allowedPoints;
