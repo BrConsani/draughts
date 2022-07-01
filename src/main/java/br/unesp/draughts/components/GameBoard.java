@@ -3,12 +3,15 @@ package br.unesp.draughts.components;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -18,7 +21,9 @@ import javax.swing.JLayeredPane;
 
 public class GameBoard extends JLayeredPane implements MouseListener, MouseMotionListener {
 
-    private final JComponent[][] pieces = new JComponent[10][10];
+    private static final int BOARD_SIZE = 10;
+
+    private final JComponent[][] pieces = new JComponent[BOARD_SIZE][BOARD_SIZE];
     private JLabel board;
     private Piece selectedPiece;
 
@@ -28,7 +33,7 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
         revalidateBoard();
     }
 
-    private final void initializeBoard() {
+    private void initializeBoard() {
         try {
             final BufferedImage boardImage = ImageIO.read(new File("res/board.jpg"));
             board = new JLabel(new ImageIcon(boardImage));
@@ -41,15 +46,14 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
             board.addMouseListener(this);
             board.addMouseMotionListener(this);
 
-            board.setLayout(new GridLayout(10, 10));
+            board.setLayout(new GridLayout(BOARD_SIZE, BOARD_SIZE));
             board.setPreferredSize(new Dimension(640, 640));
             board.setBounds(0, 0, 640, 640);
         } catch (final IOException e) {
-            e.printStackTrace();
         }
 
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 10; j++) {
+        for (int i = 0; i < BOARD_SIZE; i++) {
+            for (int j = 0; j < BOARD_SIZE; j++) {
                 pieces[i][j] = new JLabel();
                 if (i == 1 || i == 3) {
                     if (j % 2 == 0) {
@@ -75,25 +79,63 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
         }
     }
 
-    private final void revalidateBoard() {
+    private void revalidateBoard() {
         board.removeAll();
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 10; j++) {
+        for (int i = 0; i < BOARD_SIZE; i++) {
+            for (int j = 0; j < BOARD_SIZE; j++) {
                 board.add(pieces[i][j]);
             }
         }
         board.revalidate();
     }
 
-    private final void movePieceToPosition(final Piece piece, final Component position) {
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 10; j++) {
+    private void movePieceToPosition(final Piece piece, final Component position) {
+        List<Point> allowedPositions = getAllowedPositions(piece);
+        Point toGoPosition = getComponentPosition(position);
+
+        if (allowedPositions.contains(toGoPosition)) {
+            Point piecePosition = getComponentPosition(piece);
+            pieces[piecePosition.x][piecePosition.y] = new JLabel();
+            pieces[toGoPosition.x][toGoPosition.y] = piece;
+        }
+    }
+
+    private Point getComponentPosition(final Component piece) {
+        for (int i = 0; i < BOARD_SIZE; i++) {
+            for (int j = 0; j < BOARD_SIZE; j++) {
                 if (pieces[i][j] == piece) {
-                    pieces[i][j] = new JLabel();
-                } else if (pieces[i][j] == position) {
-                    pieces[i][j] = piece;
+                    return new Point(i, j);
                 }
             }
+        }
+        return new Point(0, 0);
+    }
+
+    private List<Point> getAllowedPositions(final Piece piece) {
+        final Point piecePosition = getComponentPosition(piece);
+
+        List<Point> allowedPoints = new ArrayList();
+
+        if (piece.isWhite) {
+            if (piecePosition.y > 0) {
+                allowedPoints.add(new Point(piecePosition.x - 1, piecePosition.y - 1));
+            }
+
+            if (piecePosition.y != (BOARD_SIZE - 1)) {
+                allowedPoints.add(new Point(piecePosition.x - 1, piecePosition.y + 1));
+            }
+
+            return allowedPoints;
+        } else {
+            if (piecePosition.y > 0) {
+                allowedPoints.add(new Point(piecePosition.x + 1, piecePosition.y - 1));
+            }
+
+            if (piecePosition.y != (BOARD_SIZE - 1)) {
+                allowedPoints.add(new Point(piecePosition.x + 1, piecePosition.y + 1));
+            }
+
+            return allowedPoints;
         }
     }
 
