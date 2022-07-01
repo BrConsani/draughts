@@ -18,6 +18,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
+import java.lang.Math;
 
 public class GameBoard extends JLayeredPane implements MouseListener, MouseMotionListener {
 
@@ -97,6 +98,10 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
             Point piecePosition = getComponentPosition(piece);
             pieces[piecePosition.x][piecePosition.y] = new JLabel();
             pieces[toGoPosition.x][toGoPosition.y] = piece;
+
+            if (Math.abs(piecePosition.x - toGoPosition.x) == 2 && Math.abs(piecePosition.y - toGoPosition.y) == 2) {
+                pieces[piecePosition.x + (toGoPosition.x - piecePosition.x) / 2][piecePosition.y + (toGoPosition.y - piecePosition.y) / 2] = new JLabel();
+            }
         }
     }
 
@@ -125,6 +130,11 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
                 Point positionToGo = new Point(piecePosition.x - 1, piecePosition.y - 1);
                 if (!hasPieceInPosition(positionToGo)) {
                     allowedPoints.add(positionToGo);
+                } else if (piecePosition.y > 1) {
+                    positionToGo = new Point(piecePosition.x - 2, piecePosition.y - 2);
+                    if (!hasPieceInPosition(positionToGo)) {
+                        allowedPoints.add(positionToGo);
+                    }
                 }
             }
 
@@ -132,6 +142,11 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
                 Point positionToGo = new Point(piecePosition.x - 1, piecePosition.y + 1);
                 if (!hasPieceInPosition(positionToGo)) {
                     allowedPoints.add(positionToGo);
+                } else if (piecePosition.y != (BOARD_SIZE - 2)) {
+                    positionToGo = new Point(piecePosition.x - 2, piecePosition.y + 2);
+                    if (!hasPieceInPosition(positionToGo)) {
+                        allowedPoints.add(positionToGo);
+                    }
                 }
             }
 
@@ -141,6 +156,11 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
                 Point positionToGo = new Point(piecePosition.x + 1, piecePosition.y - 1);
                 if (!hasPieceInPosition(positionToGo)) {
                     allowedPoints.add(positionToGo);
+                } else if (piecePosition.y > 1) {
+                    positionToGo = new Point(piecePosition.x + 2, piecePosition.y - 2);
+                    if (!hasPieceInPosition(positionToGo)) {
+                        allowedPoints.add(positionToGo);
+                    }
                 }
             }
 
@@ -148,6 +168,11 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
                 Point positionToGo = new Point(piecePosition.x + 1, piecePosition.y + 1);
                 if (!hasPieceInPosition(positionToGo)) {
                     allowedPoints.add(positionToGo);
+                } else if (piecePosition.y != (BOARD_SIZE - 2)) {
+                    positionToGo = new Point(piecePosition.x + 2, piecePosition.y + 2);
+                    if (!hasPieceInPosition(positionToGo)) {
+                        allowedPoints.add(positionToGo);
+                    }
                 }
             }
 
