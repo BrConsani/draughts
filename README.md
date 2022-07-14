@@ -1,4 +1,4 @@
-# draughts
+# Draughts
 Draughts game created for LCP's final project  
 
 ## Students
