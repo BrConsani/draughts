@@ -141,72 +141,112 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
     private List<Point> getAllowedPositions(final Piece piece) {
         final Point piecePosition = getComponentPosition(piece);
 
-        List<Point> allowedPoints = new ArrayList<Point>();
+        List<Point> movePoints = new ArrayList<Point>();
+        List<Point> capturePoints = new ArrayList<Point>();
 
         if (piece.isWhite) {
             if (piecePosition.x == 0) {
-                return allowedPoints;
+                return movePoints;
             }
 
             if (piecePosition.y > 0) {
                 Point positionToGo = new Point(piecePosition.x - 1, piecePosition.y - 1);
-                if (!hasPieceInPosition(positionToGo)) {
-                    allowedPoints.add(positionToGo);
-                } else if (piecePosition.y > 1 && piecePosition.x > 1 && !pieceInPositionIsWhite(positionToGo)) {
+                if (piecePosition.y > 1 && piecePosition.x > 1 && hasPieceInPosition(positionToGo)
+                        && !pieceInPositionIsWhite(positionToGo)) {
                     positionToGo = new Point(piecePosition.x - 2, piecePosition.y - 2);
                     if (!hasPieceInPosition(positionToGo)) {
-                        allowedPoints.add(positionToGo);
+                        capturePoints.add(positionToGo);
                     }
+                } else if (!hasPieceInPosition(positionToGo)) {
+                    movePoints.add(positionToGo);
                 }
             }
 
             if (piecePosition.y != (BOARD_SIZE - 1)) {
                 Point positionToGo = new Point(piecePosition.x - 1, piecePosition.y + 1);
-                if (!hasPieceInPosition(positionToGo)) {
-                    allowedPoints.add(positionToGo);
-                } else if (piecePosition.y != (BOARD_SIZE - 2) && piecePosition.x > 1
+
+                if (piecePosition.y != (BOARD_SIZE - 2) && piecePosition.x > 1 && hasPieceInPosition(positionToGo)
                         && !pieceInPositionIsWhite(positionToGo)) {
                     positionToGo = new Point(piecePosition.x - 2, piecePosition.y + 2);
                     if (!hasPieceInPosition(positionToGo)) {
-                        allowedPoints.add(positionToGo);
+                        capturePoints.add(positionToGo);
                     }
+                } else if (!hasPieceInPosition(positionToGo)) {
+                    movePoints.add(positionToGo);
                 }
             }
 
-            return allowedPoints;
+            return capturePoints.isEmpty() ? movePoints : capturePoints;
         } else {
             if (piecePosition.x == (BOARD_SIZE - 1)) {
-                return allowedPoints;
+                return movePoints;
             }
 
             if (piecePosition.y > 0) {
                 Point positionToGo = new Point(piecePosition.x + 1, piecePosition.y - 1);
-                if (!hasPieceInPosition(positionToGo)) {
-                    allowedPoints.add(positionToGo);
-                } else if (piecePosition.y > 1 && piecePosition.x < (BOARD_SIZE - 2)
+
+                if (piecePosition.y > 1 && piecePosition.x < (BOARD_SIZE - 2) && hasPieceInPosition(positionToGo)
                         && pieceInPositionIsWhite(positionToGo)) {
                     positionToGo = new Point(piecePosition.x + 2, piecePosition.y - 2);
                     if (!hasPieceInPosition(positionToGo)) {
-                        allowedPoints.add(positionToGo);
+                        capturePoints.add(positionToGo);
                     }
+                } else if (!hasPieceInPosition(positionToGo)) {
+                    movePoints.add(positionToGo);
                 }
             }
 
             if (piecePosition.y != (BOARD_SIZE - 1)) {
                 Point positionToGo = new Point(piecePosition.x + 1, piecePosition.y + 1);
-                if (!hasPieceInPosition(positionToGo)) {
-                    allowedPoints.add(positionToGo);
-                } else if (piecePosition.x < (BOARD_SIZE - 2) && piecePosition.y < (BOARD_SIZE - 2)
+
+                if (piecePosition.x < (BOARD_SIZE - 2) && piecePosition.y < (BOARD_SIZE - 2)
+                        && hasPieceInPosition(positionToGo)
                         && pieceInPositionIsWhite(positionToGo)) {
                     positionToGo = new Point(piecePosition.x + 2, piecePosition.y + 2);
                     if (!hasPieceInPosition(positionToGo)) {
-                        allowedPoints.add(positionToGo);
+                        capturePoints.add(positionToGo);
                     }
+                } else if (!hasPieceInPosition(positionToGo)) {
+                    movePoints.add(positionToGo);
                 }
             }
 
-            return allowedPoints;
+            return capturePoints.isEmpty() ? movePoints : capturePoints;
         }
+    }
+
+    private List<Piece> piecesWhoCanCapture(boolean isWhite) {
+        List<Piece> piecesWhoCanCapture = new ArrayList<Piece>();
+
+        for (int i = 0; i < BOARD_SIZE; i++) {
+            for (int j = 0; j < BOARD_SIZE; j++) {
+                if (!(pieces[i][j] instanceof Piece)) {
+                    continue;
+                }
+
+                Piece piece = (Piece) pieces[i][j];
+
+                if (piece.isWhite != isWhite) {
+                    continue;
+                }
+
+                List<Point> allowedPositions = getAllowedPositions(piece);
+
+                List<Point> filteredPoints = new ArrayList<Point>();
+
+                for (Point point : allowedPositions) {
+                    if (Math.abs(point.x - i) == 2 && Math.abs(point.y - j) == 2) {
+                        filteredPoints.add(point);
+                    }
+                }
+
+                if (!filteredPoints.isEmpty()) {
+                    piecesWhoCanCapture.add(piece);
+                }
+            }
+        }
+
+        return piecesWhoCanCapture;
     }
 
     private void showAllowedPoints(List<Point> points) {
@@ -267,6 +307,12 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
         }
 
         if (((Piece) piece).isWhite != isWhiteTurn) {
+            return;
+        }
+
+        List<Piece> piecesWhoCanCapture = piecesWhoCanCapture(isWhiteTurn);
+
+        if (!piecesWhoCanCapture.isEmpty() && !piecesWhoCanCapture.contains(piece)) {
             return;
         }
 
