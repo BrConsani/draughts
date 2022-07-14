@@ -11,6 +11,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -100,7 +101,10 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
             pieces[toGoPosition.x][toGoPosition.y] = piece;
 
             if (Math.abs(piecePosition.x - toGoPosition.x) == 2 && Math.abs(piecePosition.y - toGoPosition.y) == 2) {
-                pieces[piecePosition.x + (toGoPosition.x - piecePosition.x) / 2][piecePosition.y + (toGoPosition.y - piecePosition.y) / 2] = new JLabel();
+                int pieceXPosition = piecePosition.x + (toGoPosition.x - piecePosition.x) / 2;
+                int pieceYPosition = piecePosition.y + (toGoPosition.y - piecePosition.y) / 2;
+
+                pieces[pieceXPosition][pieceYPosition] = new JLabel();
             }
         }
     }
@@ -123,7 +127,7 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
     private List<Point> getAllowedPositions(final Piece piece) {
         final Point piecePosition = getComponentPosition(piece);
 
-        List<Point> allowedPoints = new ArrayList();
+        List<Point> allowedPoints = new ArrayList<Point>();
 
         if (piece.isWhite) {
             if (piecePosition.y > 0) {
@@ -180,6 +184,24 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
         }
     }
 
+    private void showAllowedPoints(List<Point> points) {
+        for (Point point : points) {
+            pieces[point.x][point.y] = new AllowedPosition();
+        }
+        revalidateBoard();
+    }
+
+    private void removeAllowedPoints() {
+        for (int i = 0; i < BOARD_SIZE; i++) {
+            for (int j = 0; j < BOARD_SIZE; j++) {
+                if (pieces[i][j] instanceof AllowedPosition) {
+                    pieces[i][j] = new JLabel();
+                }
+            }
+        }
+        revalidateBoard();
+    }
+
     @Override
     public void mouseDragged(final MouseEvent e) {
         if (selectedPiece == null) {
@@ -212,6 +234,11 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
         selectedPiece.setLocation(e.getX() - selectedPiece.getWidth() / 2, e.getY() - selectedPiece.getHeight() / 2);
         selectedPiece.setSize(selectedPiece.getWidth(), selectedPiece.getHeight());
 
+        List<Point> points = getAllowedPositions(selectedPiece);
+        showAllowedPoints(points);
+
+        int index = Arrays.asList(board.getComponents()).indexOf(selectedPiece);
+        board.add(new JLabel(), index);
         add(selectedPiece, JLayeredPane.DRAG_LAYER);
     }
 
@@ -226,6 +253,8 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
         if (positionToGo != board) {
             movePieceToPosition(selectedPiece, positionToGo);
         }
+
+        removeAllowedPoints();
 
         revalidateBoard();
     }
