@@ -98,6 +98,7 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
 
         if (allowedPositions.contains(toGoPosition)) {
             Point piecePosition = getComponentPosition(piece);
+
             pieces[piecePosition.x][piecePosition.y] = new JLabel();
             pieces[toGoPosition.x][toGoPosition.y] = piece;
 
@@ -107,6 +108,9 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
 
                 pieces[pieceXPosition][pieceYPosition] = new JLabel();
             }
+
+            checkIfPieceWasPromoted(piece, toGoPosition);
+
             switchTurn();
         }
     }
@@ -140,11 +144,15 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
         List<Point> allowedPoints = new ArrayList<Point>();
 
         if (piece.isWhite) {
+            if (piecePosition.x == 0) {
+                return allowedPoints;
+            }
+
             if (piecePosition.y > 0) {
                 Point positionToGo = new Point(piecePosition.x - 1, piecePosition.y - 1);
                 if (!hasPieceInPosition(positionToGo)) {
                     allowedPoints.add(positionToGo);
-                } else if (piecePosition.y > 1 && !pieceInPositionIsWhite(positionToGo)) {
+                } else if (piecePosition.y > 1 && piecePosition.x > 1 && !pieceInPositionIsWhite(positionToGo)) {
                     positionToGo = new Point(piecePosition.x - 2, piecePosition.y - 2);
                     if (!hasPieceInPosition(positionToGo)) {
                         allowedPoints.add(positionToGo);
@@ -156,7 +164,8 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
                 Point positionToGo = new Point(piecePosition.x - 1, piecePosition.y + 1);
                 if (!hasPieceInPosition(positionToGo)) {
                     allowedPoints.add(positionToGo);
-                } else if (piecePosition.y != (BOARD_SIZE - 2) && !pieceInPositionIsWhite(positionToGo)) {
+                } else if (piecePosition.y != (BOARD_SIZE - 2) && piecePosition.x > 1
+                        && !pieceInPositionIsWhite(positionToGo)) {
                     positionToGo = new Point(piecePosition.x - 2, piecePosition.y + 2);
                     if (!hasPieceInPosition(positionToGo)) {
                         allowedPoints.add(positionToGo);
@@ -166,11 +175,16 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
 
             return allowedPoints;
         } else {
+            if (piecePosition.x == (BOARD_SIZE - 1)) {
+                return allowedPoints;
+            }
+
             if (piecePosition.y > 0) {
                 Point positionToGo = new Point(piecePosition.x + 1, piecePosition.y - 1);
                 if (!hasPieceInPosition(positionToGo)) {
                     allowedPoints.add(positionToGo);
-                } else if (piecePosition.y > 1 && pieceInPositionIsWhite(positionToGo)) {
+                } else if (piecePosition.y > 1 && piecePosition.x < (BOARD_SIZE - 2)
+                        && pieceInPositionIsWhite(positionToGo)) {
                     positionToGo = new Point(piecePosition.x + 2, piecePosition.y - 2);
                     if (!hasPieceInPosition(positionToGo)) {
                         allowedPoints.add(positionToGo);
@@ -182,7 +196,8 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
                 Point positionToGo = new Point(piecePosition.x + 1, piecePosition.y + 1);
                 if (!hasPieceInPosition(positionToGo)) {
                     allowedPoints.add(positionToGo);
-                } else if (piecePosition.y != (BOARD_SIZE - 2) && pieceInPositionIsWhite(positionToGo)) {
+                } else if (piecePosition.x < (BOARD_SIZE - 2) && piecePosition.y < (BOARD_SIZE - 2)
+                        && pieceInPositionIsWhite(positionToGo)) {
                     positionToGo = new Point(piecePosition.x + 2, piecePosition.y + 2);
                     if (!hasPieceInPosition(positionToGo)) {
                         allowedPoints.add(positionToGo);
@@ -214,6 +229,14 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
 
     private void switchTurn() {
         isWhiteTurn = !isWhiteTurn;
+    }
+
+    private void checkIfPieceWasPromoted(final Piece piece, final Point position) {
+        if (piece.isWhite && position.x == 0) {
+            piece.promoveToKing();
+        } else if (!piece.isWhite && position.x == (BOARD_SIZE - 1)) {
+            piece.promoveToKing();
+        }
     }
 
     @Override
