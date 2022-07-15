@@ -12,7 +12,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -145,69 +147,127 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
         List<Point> capturePoints = new ArrayList<Point>();
 
         if (piece.isWhite) {
-            if (piecePosition.x == 0) {
-                return movePoints;
-            }
+            boolean canMoveUp = piecePosition.x - 1 > 0;
 
-            if (piecePosition.y > 0) {
-                Point positionToGo = new Point(piecePosition.x - 1, piecePosition.y - 1);
-                if (piecePosition.y > 1 && piecePosition.x > 1 && hasPieceInPosition(positionToGo)
-                        && !pieceInPositionIsWhite(positionToGo)) {
-                    positionToGo = new Point(piecePosition.x - 2, piecePosition.y - 2);
-                    if (!hasPieceInPosition(positionToGo)) {
-                        capturePoints.add(positionToGo);
+            if (canMoveUp) {
+                Point leftPoint = new Point(piecePosition.x - 1, piecePosition.y - 1);
+
+                if (pointIsInBoard(leftPoint)) {
+                    if (hasPieceInPosition(leftPoint)
+                            && !pieceInPositionIsWhite(leftPoint)) {
+                        leftPoint = new Point(piecePosition.x - 2, piecePosition.y - 2);
+                        if (pointIsInBoard(leftPoint) && !hasPieceInPosition(leftPoint)) {
+                            capturePoints.add(leftPoint);
+                        }
+                    } else if (!hasPieceInPosition(leftPoint)) {
+                        movePoints.add(leftPoint);
                     }
-                } else if (!hasPieceInPosition(positionToGo)) {
-                    movePoints.add(positionToGo);
+                }
+
+                Point rightPoint = new Point(piecePosition.x - 1, piecePosition.y + 1);
+
+                if (pointIsInBoard(rightPoint)) {
+                    if (hasPieceInPosition(rightPoint)
+                            && !pieceInPositionIsWhite(rightPoint)) {
+                        rightPoint = new Point(piecePosition.x - 2, piecePosition.y + 2);
+                        if (pointIsInBoard(rightPoint) && !hasPieceInPosition(rightPoint)) {
+                            capturePoints.add(rightPoint);
+                        }
+                    } else if (!hasPieceInPosition(rightPoint)) {
+                        movePoints.add(rightPoint);
+                    }
                 }
             }
 
-            if (piecePosition.y != (BOARD_SIZE - 1)) {
-                Point positionToGo = new Point(piecePosition.x - 1, piecePosition.y + 1);
+            boolean canMoveBottom = piecePosition.x + 1 < (BOARD_SIZE - 1);
 
-                if (piecePosition.y != (BOARD_SIZE - 2) && piecePosition.x > 1 && hasPieceInPosition(positionToGo)
-                        && !pieceInPositionIsWhite(positionToGo)) {
-                    positionToGo = new Point(piecePosition.x - 2, piecePosition.y + 2);
-                    if (!hasPieceInPosition(positionToGo)) {
-                        capturePoints.add(positionToGo);
+            if (canMoveBottom) {
+                Point leftPoint = new Point(piecePosition.x + 1, piecePosition.y - 1);
+
+                if (pointIsInBoard(leftPoint)) {
+                    if (hasPieceInPosition(leftPoint) && !pieceInPositionIsWhite(leftPoint)) {
+                        leftPoint = new Point(piecePosition.x + 2, piecePosition.y - 2);
+                        if (pointIsInBoard(leftPoint) && !hasPieceInPosition(leftPoint)) {
+                            capturePoints.add(leftPoint);
+                        }
+                    } else if (!hasPieceInPosition(leftPoint) && piece.isKing) {
+                        movePoints.add(leftPoint);
                     }
-                } else if (!hasPieceInPosition(positionToGo)) {
-                    movePoints.add(positionToGo);
+                }
+
+                Point rightPoint = new Point(piecePosition.x + 1, piecePosition.y + 1);
+
+                if (pointIsInBoard(rightPoint)) {
+                    if (hasPieceInPosition(rightPoint) && !pieceInPositionIsWhite(rightPoint)) {
+                        rightPoint = new Point(piecePosition.x + 2, piecePosition.y + 2);
+                        if (pointIsInBoard(rightPoint) && !hasPieceInPosition(rightPoint)) {
+                            capturePoints.add(rightPoint);
+                        }
+                    } else if (!hasPieceInPosition(rightPoint) && piece.isKing) {
+                        movePoints.add(rightPoint);
+                    }
                 }
             }
 
             return capturePoints.isEmpty() ? movePoints : capturePoints;
         } else {
-            if (piecePosition.x == (BOARD_SIZE - 1)) {
-                return movePoints;
-            }
+            boolean canMoveUp = piecePosition.x - 1 > 0;
 
-            if (piecePosition.y > 0) {
-                Point positionToGo = new Point(piecePosition.x + 1, piecePosition.y - 1);
+            if (canMoveUp) {
+                Point leftPoint = new Point(piecePosition.x - 1, piecePosition.y - 1);
 
-                if (piecePosition.y > 1 && piecePosition.x < (BOARD_SIZE - 2) && hasPieceInPosition(positionToGo)
-                        && pieceInPositionIsWhite(positionToGo)) {
-                    positionToGo = new Point(piecePosition.x + 2, piecePosition.y - 2);
-                    if (!hasPieceInPosition(positionToGo)) {
-                        capturePoints.add(positionToGo);
+                if (pointIsInBoard(leftPoint)) {
+                    if (hasPieceInPosition(leftPoint) && pieceInPositionIsWhite(leftPoint)) {
+                        leftPoint = new Point(piecePosition.x - 2, piecePosition.y - 2);
+                        if (pointIsInBoard(leftPoint) && !hasPieceInPosition(leftPoint)) {
+                            capturePoints.add(leftPoint);
+                        }
+                    } else if (!hasPieceInPosition(leftPoint) && piece.isKing) {
+                        movePoints.add(leftPoint);
                     }
-                } else if (!hasPieceInPosition(positionToGo)) {
-                    movePoints.add(positionToGo);
+                }
+
+                Point rightPoint = new Point(piecePosition.x - 1, piecePosition.y + 1);
+
+                if (pointIsInBoard(rightPoint)) {
+                    if (hasPieceInPosition(rightPoint) && pieceInPositionIsWhite(rightPoint)) {
+                        rightPoint = new Point(piecePosition.x - 2, piecePosition.y + 2);
+                        if (pointIsInBoard(rightPoint) && !hasPieceInPosition(rightPoint)) {
+                            capturePoints.add(rightPoint);
+                        }
+                    } else if (!hasPieceInPosition(rightPoint) && piece.isKing) {
+                        movePoints.add(rightPoint);
+                    }
                 }
             }
 
-            if (piecePosition.y != (BOARD_SIZE - 1)) {
-                Point positionToGo = new Point(piecePosition.x + 1, piecePosition.y + 1);
+            boolean canMoveBottom = piecePosition.x + 1 < (BOARD_SIZE - 1);
 
-                if (piecePosition.x < (BOARD_SIZE - 2) && piecePosition.y < (BOARD_SIZE - 2)
-                        && hasPieceInPosition(positionToGo)
-                        && pieceInPositionIsWhite(positionToGo)) {
-                    positionToGo = new Point(piecePosition.x + 2, piecePosition.y + 2);
-                    if (!hasPieceInPosition(positionToGo)) {
-                        capturePoints.add(positionToGo);
+            if (canMoveBottom) {
+                Point leftPoint = new Point(piecePosition.x + 1, piecePosition.y - 1);
+
+                if (pointIsInBoard(leftPoint)) {
+                    if (hasPieceInPosition(leftPoint) && pieceInPositionIsWhite(leftPoint)) {
+                        leftPoint = new Point(piecePosition.x + 2, piecePosition.y - 2);
+                        if (pointIsInBoard(leftPoint) && !hasPieceInPosition(leftPoint)) {
+                            capturePoints.add(leftPoint);
+                        }
+                    } else if (!hasPieceInPosition(leftPoint)) {
+                        movePoints.add(leftPoint);
                     }
-                } else if (!hasPieceInPosition(positionToGo)) {
-                    movePoints.add(positionToGo);
+                }
+
+                Point rightPoint = new Point(piecePosition.x + 1, piecePosition.y + 1);
+
+                if (pointIsInBoard(rightPoint)) {
+                    if (hasPieceInPosition(rightPoint) && pieceInPositionIsWhite(rightPoint)) {
+                        rightPoint = new Point(piecePosition.x + 2, piecePosition.y + 2);
+                        if (pointIsInBoard(rightPoint) && !hasPieceInPosition(rightPoint)) {
+                            capturePoints.add(rightPoint);
+                        }
+                    } else if (!hasPieceInPosition(rightPoint)) {
+                        movePoints.add(rightPoint);
+                    }
                 }
             }
 
@@ -215,8 +275,12 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
         }
     }
 
+    private boolean pointIsCaptureMove(Point piecePosition, Point toGoPosition) {
+        return Math.abs(piecePosition.x - toGoPosition.x) == 2 && Math.abs(piecePosition.y - toGoPosition.y) == 2;
+    }
+
     private List<Piece> piecesWhoCanCapture(boolean isWhite) {
-        List<Piece> piecesWhoCanCapture = new ArrayList<Piece>();
+        Set<Piece> piecesWhoCanCapture = new HashSet<Piece>();
 
         for (int i = 0; i < BOARD_SIZE; i++) {
             for (int j = 0; j < BOARD_SIZE; j++) {
@@ -230,23 +294,19 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
                     continue;
                 }
 
+                Point piecePosition = getComponentPosition(piece);
+
                 List<Point> allowedPositions = getAllowedPositions(piece);
 
-                List<Point> filteredPoints = new ArrayList<Point>();
-
                 for (Point point : allowedPositions) {
-                    if (Math.abs(point.x - i) == 2 && Math.abs(point.y - j) == 2) {
-                        filteredPoints.add(point);
+                    if (pointIsCaptureMove(piecePosition, point)) {
+                        piecesWhoCanCapture.add(piece);
                     }
-                }
-
-                if (!filteredPoints.isEmpty()) {
-                    piecesWhoCanCapture.add(piece);
                 }
             }
         }
 
-        return piecesWhoCanCapture;
+        return new ArrayList<>(piecesWhoCanCapture);
     }
 
     private void showAllowedPoints(List<Point> points) {
@@ -277,6 +337,13 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
         } else if (!piece.isWhite && position.x == (BOARD_SIZE - 1)) {
             piece.promoveToKing();
         }
+    }
+
+    private boolean pointIsInBoard(Point point) {
+        if (point.x < 0 || point.x > (BOARD_SIZE - 1) || point.y < 0 || point.y > (BOARD_SIZE - 1)) {
+            return false;
+        }
+        return true;
     }
 
     @Override
