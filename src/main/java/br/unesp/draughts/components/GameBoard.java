@@ -30,6 +30,7 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
     private final JComponent[][] pieces = new JComponent[BOARD_SIZE][BOARD_SIZE];
     private JLabel board;
     private Piece selectedPiece;
+    private Piece pieceToCaptureMorePieces;
     private boolean isWhiteTurn = true;
 
     public GameBoard() {
@@ -104,16 +105,28 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
             pieces[piecePosition.x][piecePosition.y] = new JLabel();
             pieces[toGoPosition.x][toGoPosition.y] = piece;
 
-            if (Math.abs(piecePosition.x - toGoPosition.x) == 2 && Math.abs(piecePosition.y - toGoPosition.y) == 2) {
+            if (pointIsCaptureMove(piecePosition, toGoPosition)) {
                 int pieceXPosition = piecePosition.x + (toGoPosition.x - piecePosition.x) / 2;
                 int pieceYPosition = piecePosition.y + (toGoPosition.y - piecePosition.y) / 2;
 
                 pieces[pieceXPosition][pieceYPosition] = new JLabel();
+
+                List<Point> capturePositions = getAllowedPositions(piece, true);
+
+                if (!capturePositions.isEmpty()) {
+                    removeAllowedPoints();
+                    showAllowedPoints(capturePositions);
+                    pieceToCaptureMorePieces = piece;
+                } else {
+                    switchTurn();
+                }
+            } else {
+                switchTurn();
             }
 
             checkIfPieceWasPromoted(piece, toGoPosition);
-
-            switchTurn();
+        } else {
+            removeAllowedPoints();
         }
     }
 
@@ -141,6 +154,10 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
     }
 
     private List<Point> getAllowedPositions(final Piece piece) {
+        return getAllowedPositions(piece, false);
+    }
+
+    private List<Point> getAllowedPositions(final Piece piece, final boolean ignoreMoves) {
         final Point piecePosition = getComponentPosition(piece);
 
         List<Point> movePoints = new ArrayList<Point>();
@@ -160,7 +177,9 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
                             capturePoints.add(leftPoint);
                         }
                     } else if (!hasPieceInPosition(leftPoint)) {
-                        movePoints.add(leftPoint);
+                        if (!ignoreMoves) {
+                            movePoints.add(leftPoint);
+                        }
                     }
                 }
 
@@ -174,7 +193,9 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
                             capturePoints.add(rightPoint);
                         }
                     } else if (!hasPieceInPosition(rightPoint)) {
-                        movePoints.add(rightPoint);
+                        if (!ignoreMoves) {
+                            movePoints.add(rightPoint);
+                        }
                     }
                 }
             }
@@ -191,7 +212,9 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
                             capturePoints.add(leftPoint);
                         }
                     } else if (!hasPieceInPosition(leftPoint) && piece.isKing) {
-                        movePoints.add(leftPoint);
+                        if (!ignoreMoves) {
+                            movePoints.add(leftPoint);
+                        }
                     }
                 }
 
@@ -204,7 +227,9 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
                             capturePoints.add(rightPoint);
                         }
                     } else if (!hasPieceInPosition(rightPoint) && piece.isKing) {
-                        movePoints.add(rightPoint);
+                        if (!ignoreMoves) {
+                            movePoints.add(rightPoint);
+                        }
                     }
                 }
             }
@@ -223,7 +248,9 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
                             capturePoints.add(leftPoint);
                         }
                     } else if (!hasPieceInPosition(leftPoint) && piece.isKing) {
-                        movePoints.add(leftPoint);
+                        if (!ignoreMoves) {
+                            movePoints.add(leftPoint);
+                        }
                     }
                 }
 
@@ -236,7 +263,9 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
                             capturePoints.add(rightPoint);
                         }
                     } else if (!hasPieceInPosition(rightPoint) && piece.isKing) {
-                        movePoints.add(rightPoint);
+                        if (!ignoreMoves) {
+                            movePoints.add(rightPoint);
+                        }
                     }
                 }
             }
@@ -253,7 +282,9 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
                             capturePoints.add(leftPoint);
                         }
                     } else if (!hasPieceInPosition(leftPoint)) {
-                        movePoints.add(leftPoint);
+                        if (!ignoreMoves) {
+                            movePoints.add(leftPoint);
+                        }
                     }
                 }
 
@@ -266,7 +297,9 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
                             capturePoints.add(rightPoint);
                         }
                     } else if (!hasPieceInPosition(rightPoint)) {
-                        movePoints.add(rightPoint);
+                        if (!ignoreMoves) {
+                            movePoints.add(rightPoint);
+                        }
                     }
                 }
             }
@@ -328,6 +361,8 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
     }
 
     private void switchTurn() {
+        pieceToCaptureMorePieces = null;
+        removeAllowedPoints();
         isWhiteTurn = !isWhiteTurn;
     }
 
@@ -369,6 +404,10 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
 
         final Component piece = board.findComponentAt(e.getX(), e.getY());
 
+        if (pieceToCaptureMorePieces != null && pieceToCaptureMorePieces != piece) {
+            return;
+        }
+
         if (!(piece instanceof Piece)) {
             return;
         }
@@ -407,10 +446,6 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
         if (positionToGo != board) {
             movePieceToPosition(selectedPiece, positionToGo);
         }
-
-        removeAllowedPoints();
-
-        revalidateBoard();
     }
 
     @Override
