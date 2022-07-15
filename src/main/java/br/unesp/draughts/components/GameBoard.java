@@ -147,7 +147,7 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
         List<Point> capturePoints = new ArrayList<Point>();
 
         if (piece.isWhite) {
-            boolean canMoveUp = piecePosition.x - 1 > 0;
+            boolean canMoveUp = piecePosition.x - 1 >= 0;
 
             if (canMoveUp) {
                 Point leftPoint = new Point(piecePosition.x - 1, piecePosition.y - 1);
@@ -179,7 +179,7 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
                 }
             }
 
-            boolean canMoveBottom = piecePosition.x + 1 < (BOARD_SIZE - 1);
+            boolean canMoveBottom = piecePosition.x + 1 <= (BOARD_SIZE - 1);
 
             if (canMoveBottom) {
                 Point leftPoint = new Point(piecePosition.x + 1, piecePosition.y - 1);
@@ -211,7 +211,7 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
 
             return capturePoints.isEmpty() ? movePoints : capturePoints;
         } else {
-            boolean canMoveUp = piecePosition.x - 1 > 0;
+            boolean canMoveUp = piecePosition.x - 1 >= 0;
 
             if (canMoveUp) {
                 Point leftPoint = new Point(piecePosition.x - 1, piecePosition.y - 1);
@@ -241,7 +241,7 @@ public class GameBoard extends JLayeredPane implements MouseListener, MouseMotio
                 }
             }
 
-            boolean canMoveBottom = piecePosition.x + 1 < (BOARD_SIZE - 1);
+            boolean canMoveBottom = piecePosition.x + 1 <= (BOARD_SIZE - 1);
 
             if (canMoveBottom) {
                 Point leftPoint = new Point(piecePosition.x + 1, piecePosition.y - 1);
